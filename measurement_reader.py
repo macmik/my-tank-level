@@ -33,6 +33,8 @@ class MeasurementReader(Worker):
             ts = DT.now()
             if ts - self._last_measurement_added > self._interval_sec:
                 logger.info(f'Put new measurement to queue, {str(ts)}, {str(distance)} mm.')
+                with open('measurements.txt', 'a') as fo:
+                    fo.write(str(ts) + ',' + str(distance) + '\n')
                 self._queue.put(Measurement(ts, distance))
                 self._last_measurement_added = ts
 
