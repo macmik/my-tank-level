@@ -10,7 +10,7 @@ from measurement_reader import MeasurementReader
 from measurement_consumer import MeasurementConsumer
 
 
-from flask import Flask
+from flask import Flask, jsonify
 
 
 def setup_logging():
@@ -49,13 +49,32 @@ def create_app():
     measurement_reader.start()
     measurement_consumer.start()
 
+    app.consumer = measurement_consumer
+    app.app_config = config
+
     return app
 
 
 app = create_app()
 
+
+@app.route('/state', methods=['GET'])
+def state():
+    measurement = app.consumer.get_last_measurement()
+
+    response_dict = {
+        'timestamp': None,
+        'distance_mm': None,
+        'level_percent': None
+    }
+
+    if measurement:
+        response_dict['timestamp'] = measurement.ts.strftime('%Y%m%d-%H:%M:%S')
+        response_dict['distance_mm'] = measurement.distance
+        response_dict['level_percent'] = round((measurement.distance / app.app_config['tank_height_mm']) * 100.0, 2)
+
+    return jsonify(response_dict)
+
+
 if __name__ == '__main__':
-    #ms = MeasurementReader(json.loads(Path('config.json').read_text()), Event(), Queue())
-    #while True:
-    #    ms._do()
     app.run(host="0.0.0.0", port=8000, debug=True)
