@@ -2,6 +2,12 @@ import sys
 import json
 import logging
 from os import environ
+from pathlib import Path
+from threading import Event
+from queue import Queue
+
+from measurement_reader import MeasurementReader
+from measurement_consumer import MeasurementConsumer
 
 
 from flask import Flask
@@ -10,7 +16,7 @@ from flask import Flask
 def setup_logging():
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
-    log_level = environ.get("LOG_LVL", "dump")
+    log_level = environ.get("LOG_LVL", "info")
     if log_level == "dump":
         level = logging.DEBUG
     elif log_level == "info":
@@ -32,6 +38,16 @@ def setup_logging():
 def create_app():
     app = Flask(__name__, static_folder='templates')
     config = json.loads(Path('config.json').read_text())
+    setup_logging()
+
+    queue = Queue()
+    stop_event = Event()
+
+    measurement_reader = MeasurementReader(config, stop_event, queue)
+    measurement_consumer = MeasurementConsumer(config, stop_event, queue)
+
+    measurement_reader.start()
+    measurement_consumer.start()
 
     return app
 
@@ -39,4 +55,7 @@ def create_app():
 app = create_app()
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=8000)
+    #ms = MeasurementReader(json.loads(Path('config.json').read_text()), Event(), Queue())
+    #while True:
+    #    ms._do()
+    app.run(host="0.0.0.0", port=8000, debug=True)
