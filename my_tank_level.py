@@ -71,7 +71,7 @@ def state():
     if measurement:
         response_dict['timestamp'] = measurement.ts.strftime('%Y%m%d-%H:%M:%S')
         response_dict['distance_mm'] = measurement.distance
-        response_dict['level_percent'] = round((measurement.distance / app.app_config['tank_height_mm']) * 100.0, 2)
+        response_dict['level_percent'] = round((measurement.distance / app.app_config['tank_height_mm']) * 100.0)
 
     return jsonify(response_dict)
 
