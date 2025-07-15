@@ -73,7 +73,7 @@ def state():
                     app.app_config['tank_height_mm'] - app.app_config['sensor_distance_from_min']) * 100.0
         )
         response_dict['timestamp'] = measurement.ts.strftime('%Y%m%d-%H:%M:%S')
-        response_dict['distance_mm'] = measurement.distance
+        response_dict['distance_mm'] = measurement.distance - app.app_config['sensor_distance_from_min']
         response_dict['level_percent'] = calc_level_percent
 
     return jsonify(response_dict)
