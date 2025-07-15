@@ -1,5 +1,5 @@
 {
   "store_interval_sec": 60,
   "tank_height_mm": 1500,
-  "sensor_distance_from_min": 150
+  "sensor_distance_from_min": 280
 }
